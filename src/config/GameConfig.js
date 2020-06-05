@@ -82,7 +82,9 @@ MW.CONTAINER = {
     SPARKS:[],
     HITS:[],
     BACKSKYS:[],
-    BACKTILEMAPS:[]
+    BACKTILEMAPS:[],
+    // Flappybird
+    PIPES: []
 };
 
 //bullet speed

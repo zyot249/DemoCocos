@@ -41,7 +41,11 @@ var res = {
     textureTransparentPack_png : 'res/textureTransparentPack.png',
     // Flappy Bird
     flbBackground_png : 'res/flappybird/back_ground.png',
-    flbBirdUp_png : 'res/flappybird/bird_up.png'
+    flbBirdUp_png : 'res/flappybird/bird_up.png',
+    flbBirdMid_png : 'res/flappybird/bird_mid.png',
+    flbBirdDown_png : 'res/flappybird/bird_down.png',
+    flbPipe_png : 'res/flappybird/pipe.png',
+    flbBase_png : 'res/flappybird/base.png'
 };
 
 var g_mainmenu = [

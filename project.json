@@ -30,6 +30,8 @@
         "src/SparkEffect.js",
         "src/Background.js",
         "src/FlappyBirdGameLayer.js",
-        "src/Bird.js"
+        "src/Bird.js",
+        "src/Pipe.js",
+        "src/Base.js"
     ]
 }
