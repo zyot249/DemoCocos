@@ -8,18 +8,7 @@ var Bird = cc.Sprite.extend({
     ctor: function() {
         this._super(res.flbBirdUp_png);
         this.winSize = cc.director.getWinSize();
-        this.x = this.winSize.width / 2;
-        this.y = (this.winSize.height - BASE_HEIGHT) / 2 + BASE_HEIGHT;
-
-        var animation = new cc.Animation();
-        animation.addSpriteFrameWithFile(res.flbBirdUp_png);
-        animation.addSpriteFrameWithFile(res.flbBirdMid_png);
-        animation.addSpriteFrameWithFile(res.flbBirdDown_png);
-        animation.setDelayPerUnit(1 / 20);
-        animation.setRestoreOriginalFrame(true);
-
-        var animate = cc.animate(animation);
-        this.runAction(animate.repeatForever());
+        this.init();
     },
     update: function(dt) {
         var nextY = this.y + this.velocity*dt;
@@ -46,5 +35,20 @@ var Bird = cc.Sprite.extend({
         this.setRotation(90);
         var actionFall = cc.moveTo(0.5, this.x, BASE_HEIGHT + this.height / 2);
         this.runAction(actionFall);
+    },
+    init: function() {
+        this.setRotation(0);
+        this.x = this.winSize.width / 2;
+        this.y = (this.winSize.height - BASE_HEIGHT) / 2 + BASE_HEIGHT;
+
+        var animation = new cc.Animation();
+        animation.addSpriteFrameWithFile(res.flbBirdUp_png);
+        animation.addSpriteFrameWithFile(res.flbBirdMid_png);
+        animation.addSpriteFrameWithFile(res.flbBirdDown_png);
+        animation.setDelayPerUnit(1 / 20);
+        animation.setRestoreOriginalFrame(true);
+
+        var animate = cc.animate(animation);
+        this.runAction(animate.repeatForever());
     }
 });
