@@ -2,16 +2,18 @@
  * Created by Zyot on 6/4/2020.
  */
 
-var g_sharedPlappyBirdGameLayer;
+VELOCITY_ONCLICK = 420;
+var g_sharedFlappyBirdGameLayer;
 
 var FlappyBirdGameLayer = cc.Layer.extend({
-    _bird: null,
-    _isScheduled: false,
-    _base: null,
+    bird: null,
+    isScheduled: false,
+    base: null,
     winSize: null,
-    _tmpScore: 0,
+    tmpScore: 0,
     lbScore: null,
-    _isGameEnded: false,
+    isGameEnded: false,
+    gameOverSprite: null,
 
     ctor: function() {
         this._super();
@@ -20,12 +22,12 @@ var FlappyBirdGameLayer = cc.Layer.extend({
     init: function() {
         this.winSize = cc.director.getWinSize();
         this.initBackground();
-        this._bird = new Bird();
-        this.addChild(this._bird, 10);
-        this._base = new BaseLayer();
-        this.addChild(this._base, 1, 10);
+        this.bird = new Bird();
+        this.addChild(this.bird, 10);
+        this.base = new BaseLayer();
+        this.addChild(this.base, 1, 10);
         this.addTouchListener();
-        g_sharedPlappyBirdGameLayer = this;
+        g_sharedFlappyBirdGameLayer = this;
 
         // score
         this.lbScore = new cc.LabelBMFont("Score: 0", res.arial_14_fnt);
@@ -42,6 +44,9 @@ var FlappyBirdGameLayer = cc.Layer.extend({
         MW.SCORE = 0;
 
         Pipe.preSet();
+        this.gameOverSprite = new FlappyBirdGameOver();
+        this.addChild(this.gameOverSprite, 10);
+
         return true;
     },
     initBackground: function () {
@@ -59,48 +64,43 @@ var FlappyBirdGameLayer = cc.Layer.extend({
         cc.eventManager.addListener({
             event: cc.EventListener.TOUCH_ONE_BY_ONE,
             shallowTouches: true,
-            onTouchBegan: this.onTouchBegan.bind(this),
-            //onTouchesMoved: function(touch, event) {
-            //
-            //},
-            //onTouchEnded: function(touch, event) {
-            //
-            //},
-            //onTouchCancelled: function(touch, event) {
-            //
-            //}
+            onTouchBegan: this.onTouchBegan.bind(this)
         }, this);
     },
     onTouchBegan: function(touch, event) {
-        if (this._isGameEnded) {
+        if (this.bird.isFalling()) {
+            return true;
+        }
+        if (this.isGameEnded) {
             this.renewGame();
         } else {
-            if (!this._isScheduled) {
+            if (!this.isScheduled) {
                 this.scheduleUpdate();
-                this._isScheduled = true;
+                this.base.flow();
+                this.isScheduled = true;
             }
-            this._bird.updateVelocity(420);
+            this.bird.updateVelocity(VELOCITY_ONCLICK);
         }
         return true;
     },
     update: function (dt) {
         this.checkIsCollision();
-        this._bird.update(dt);
+        this.bird.update(dt);
         for (var i = 0; i < MW.CONTAINER.PIPES.length; i ++) {
             var pipe = MW.CONTAINER.PIPES[i];
             if (i % 2 == 1) {
                 pipe.updateMove(MW.CONTAINER.PIPES[i - 1]);
             } else {
                 pipe.updateMove(null);
-                if (!pipe.isPassed) {
-                    if (pipe.isBirdIn) {
-                        if (this._bird.x > pipe.x + pipe.width / 2) {
+                if (!pipe.checkIsPassed()) {
+                    if (pipe.checkIsBirdIn()) {
+                        if (this.bird.x > pipe.x + pipe.width / 2) {
                             MW.SCORE++;
-                            pipe.isPassed = true;
+                            pipe.setIsPassed(true);
                         }
                     } else {
-                        if ((this._bird.x <= pipe.x + pipe.width / 2) && (this._bird.x >= pipe.x - pipe.width / 2)) {
-                            pipe.isBirdIn = true;
+                        if ((this.bird.x <= pipe.x + pipe.width / 2) && (this.bird.x >= pipe.x - pipe.width / 2)) {
+                            pipe.setIsBirdIn(true);
                         }
                     }
                 }
@@ -109,31 +109,32 @@ var FlappyBirdGameLayer = cc.Layer.extend({
         this.updateUI();
     },
     checkIsCollision: function() {
-        if (this._bird.y <= BASE_HEIGHT + this._bird.height / 2) {
+        if (this.bird.y <= BASE_HEIGHT + this.bird.height / 2) {
             cc.log("Collide");
             this.endGame();
             return;
         }
         for (var i = 0; i < MW.CONTAINER.PIPES.length; i ++) {
             var pipe = MW.CONTAINER.PIPES[i];
-            if (this.collide(this._bird, pipe)) {
+            if (this.collide(this.bird, pipe)) {
                 cc.log("Collide");
                 this.endGame();
             }
         }
     },
     endGame: function() {
-        this._base.stopMove();
         this.unscheduleUpdate();
-        this._bird.fall();
-        this._isScheduled = false;
-        this._isGameEnded = true;
+        this.isScheduled = false;
+        this.isGameEnded = true;
+        this.base.stopMove();
+        this.bird.fall();
+        this.gameOverSprite.init();
     },
     updateUI:function () {
-        if (this._tmpScore < MW.SCORE) {
-            this._tmpScore += 1;
+        if (this.tmpScore < MW.SCORE) {
+            this.tmpScore += 1;
         }
-        this.lbScore.setString("Score: " + this._tmpScore);
+        this.lbScore.setString("Score: " + this.tmpScore);
     },
     collide: function(a, b) {
         var ax = a.x, ay = a.y, bx = b.x, by = b.y;
@@ -142,8 +143,12 @@ var FlappyBirdGameLayer = cc.Layer.extend({
         return cc.rectIntersectsRect(aRect, bRect);
     },
     renewGame: function() {
-        this._bird.init();
-        this._isGameEnded = false;
+        this.gameOverSprite.disable();
+        this.isGameEnded = false;
+        this.bird.init();
+        Pipe.resetToStart();
+        this.tmpScore = 0;
+        MW.SCORE = 0;
     }
 });
 
@@ -155,8 +160,6 @@ FlappyBirdGameLayer.scene = function () {
     var scene = new cc.Scene();
     var layer = new FlappyBirdGameLayer();
     scene.addChild(layer, 0);
-    //var baseLayer = new BaseLayer();
-    //scene.addChild(baseLayer, 1, 10);
     return scene;
 };
 

@@ -93,7 +93,7 @@ cc.game.onStart = function(){
     }
     //load resources
     cc.LoaderScene.preload(g_mainmenu, function () {
-        cc.director.runScene(FlappyBirdGameLayer.scene());
+        cc.director.runScene(FlappyBirdStartGameLayer.scene());
     }, this);
 };
 

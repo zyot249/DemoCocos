@@ -45,7 +45,9 @@ var res = {
     flbBirdMid_png : 'res/flappybird/bird_mid.png',
     flbBirdDown_png : 'res/flappybird/bird_down.png',
     flbPipe_png : 'res/flappybird/pipe.png',
-    flbBase_png : 'res/flappybird/base.png'
+    flbBase_png : 'res/flappybird/base.png',
+    flbOnStart_png : 'res/flappybird/on_start.png',
+    flbGameOver_png : 'res/flappybird/game_over.png'
 };
 
 var g_mainmenu = [

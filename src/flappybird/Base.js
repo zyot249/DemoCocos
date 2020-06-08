@@ -5,7 +5,6 @@ BASE_HEIGHT = 200;
 
 var BaseLayer = cc.Layer.extend({
     winSize: null,
-    actionBaseMove: null,
     ctor: function() {
         this._super();
         this.winSize = cc.director.getWinSize();
@@ -35,17 +34,18 @@ var BaseLayer = cc.Layer.extend({
         base2.x = 0;
         this.addChild(base1);
         this.addChild(base2);
-
-        var actionMove = cc.moveTo(5, -this.winSize.width, 0);
-        var callFun = cc.callFunc(this.moveToRight, this);
-        var seq = cc.sequence(actionMove, callFun);
-        this.actionBaseMove = seq.repeatForever();
-        this.runAction(this.actionBaseMove);
     },
-    moveToRight: function() {
+    blinkToRight: function() {
         this.x = 0;
     },
     stopMove: function() {
         this.stopAllActions();
+    },
+    flow: function() {
+        this.blinkToRight();
+        var actionMove = cc.moveTo(4, -this.winSize.width, 0);
+        var callFun = cc.callFunc(this.blinkToRight, this);
+        var seq = cc.sequence(actionMove, callFun);
+        this.runAction(seq.repeatForever());
     }
 });

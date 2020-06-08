@@ -29,9 +29,11 @@
         "src/HitEffect.js",
         "src/SparkEffect.js",
         "src/Background.js",
-        "src/FlappyBirdGameLayer.js",
-        "src/Bird.js",
-        "src/Pipe.js",
-        "src/Base.js"
+        "src/flappybird/FlappyBirdGameLayer.js",
+        "src/flappybird/Bird.js",
+        "src/flappybird/Pipe.js",
+        "src/flappybird/Base.js",
+        "src/flappybird/FlappyBirdStartGameLayer.js",
+        "src/flappybird/FlappyBirdGameOver.js"
     ]
 }
