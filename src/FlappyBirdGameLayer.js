@@ -9,6 +9,8 @@ var FlappyBirdGameLayer = cc.Layer.extend({
     _isScheduled: false,
     _base: null,
     winSize: null,
+    _tmpScore: 0,
+    lbScore: null,
 
     ctor: function() {
         this._super();
@@ -18,13 +20,11 @@ var FlappyBirdGameLayer = cc.Layer.extend({
         this.winSize = cc.director.getWinSize();
         this.initBackground();
         this._bird = new Bird();
-        this.addChild(this._bird, 10, 4);
+        this.addChild(this._bird, 10);
+        this._base = new BaseLayer();
+        this.addChild(this._base, 1, 10);
         this.addTouchListener();
         g_sharedPlappyBirdGameLayer = this;
-
-
-        this._base = new Base();
-        this.addChild(this._base, 1, 3);
 
         // score
         this.lbScore = new cc.LabelBMFont("Score: 0", res.arial_14_fnt);
@@ -37,6 +37,8 @@ var FlappyBirdGameLayer = cc.Layer.extend({
         });
         this.lbScore.textAlign = cc.TEXT_ALIGNMENT_RIGHT;
         this.addChild(this.lbScore, 1000);
+
+        MW.SCORE = 0;
 
         Pipe.preSet();
         return true;
@@ -80,16 +82,31 @@ var FlappyBirdGameLayer = cc.Layer.extend({
         this.checkIsCollision();
         this._bird.update(dt);
         for (var i = 0; i < MW.CONTAINER.PIPES.length; i ++) {
+            var pipe = MW.CONTAINER.PIPES[i];
             if (i % 2 == 1) {
-                MW.CONTAINER.PIPES[i].updateMove(MW.CONTAINER.PIPES[i - 1]);
+                pipe.updateMove(MW.CONTAINER.PIPES[i - 1]);
             } else {
-                MW.CONTAINER.PIPES[i].updateMove(null);
+                pipe.updateMove(null);
+                if (!pipe.isPassed) {
+                    if (pipe.isBirdIn) {
+                        if (this._bird.x > pipe.x + pipe.width / 2) {
+                            MW.SCORE++;
+                            pipe.isPassed = true;
+                        }
+                    } else {
+                        if ((this._bird.x <= pipe.x + pipe.width / 2) && (this._bird.x >= pipe.x - pipe.width / 2)) {
+                            pipe.isBirdIn = true;
+                        }
+                    }
+                }
             }
         }
+        this.updateUI();
     },
     checkIsCollision: function() {
         if (this._bird.y <= BASE_HEIGHT + this._bird.height / 2) {
             cc.log("Collide");
+            this._base.stopMove();
             this.unscheduleUpdate();
             this._bird.fall();
             return;
@@ -98,10 +115,17 @@ var FlappyBirdGameLayer = cc.Layer.extend({
             var pipe = MW.CONTAINER.PIPES[i];
             if (this.collide(this._bird, pipe)) {
                 cc.log("Collide");
+                this._base.stopMove();
                 this.unscheduleUpdate();
                 this._bird.fall();
             }
         }
+    },
+    updateUI:function () {
+        if (this._tmpScore < MW.SCORE) {
+            this._tmpScore += 1;
+        }
+        this.lbScore.setString("Score: " + this._tmpScore);
     },
     collide: function(a, b) {
         var ax = a.x, ay = a.y, bx = b.x, by = b.y;
@@ -118,6 +142,9 @@ FlappyBirdGameLayer.prototype.addPipe = function (pipe, z, tag) {
 FlappyBirdGameLayer.scene = function () {
     var scene = new cc.Scene();
     var layer = new FlappyBirdGameLayer();
-    scene.addChild(layer);
+    scene.addChild(layer, 0);
+    //var baseLayer = new BaseLayer();
+    //scene.addChild(baseLayer, 1, 10);
     return scene;
 };
+

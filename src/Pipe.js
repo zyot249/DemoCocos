@@ -6,13 +6,13 @@ DISTANCE_OF_TWO_PIPES = 140;
 var Pipe = cc.Sprite.extend({
     winSize: null,
     dx: 2,
-    isUp: false,
     spacePositionY: 0,
+    isPassed: false,
+    isBirdIn: false,
     ctor: function (isUp, spacePositionY, x) {
         this._super(res.flbPipe_png);
         this.winSize = cc.director.getWinSize();
         this.x = x + this.width/2;
-        this.isUp = isUp;
         this.spacePositionY = spacePositionY;
         if (isUp) {
             this.y = spacePositionY - this.height/2 - DISTANCE_OF_TWO_PIPES/2;
@@ -20,7 +20,8 @@ var Pipe = cc.Sprite.extend({
             this.flippedY = true;
             this.y = spacePositionY + this.height/2 + DISTANCE_OF_TWO_PIPES/2;
         }
-
+        this.isPassed = false;
+        this.isBirdIn = false;
     },
     updateMove: function(pipeUp) {
         var nextX = this.x - this.dx;
@@ -33,6 +34,8 @@ var Pipe = cc.Sprite.extend({
                 this.spacePositionY = this.getRandomInt(this.winSize.height - DISTANCE_OF_TWO_PIPES, BASE_HEIGHT + DISTANCE_OF_TWO_PIPES);
                 this.y = this.spacePositionY - this.height/2 - DISTANCE_OF_TWO_PIPES/2;
             }
+            this.isPassed = false;
+            this.isBirdIn = false;
         } else {
             this.x = nextX;
         }
